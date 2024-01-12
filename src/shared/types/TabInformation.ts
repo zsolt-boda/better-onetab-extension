@@ -1,9 +1,7 @@
+import type { PageMetadata } from './PageMetadata'
+
 export interface TabInformation {
   title: string
   url: string
-  meta: {
-    status: 'loading' | 'error' | 'finished'
-    description: string | null
-    img: string | null
-  }
+  meta: PageMetadata
 }
