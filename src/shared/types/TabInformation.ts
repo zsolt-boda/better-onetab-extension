@@ -1,6 +1,9 @@
 export interface TabInformation {
   title: string
   url: string
-  description: string
-  img: string
+  meta: {
+    status: 'loading' | 'error' | 'finished'
+    description: string | null
+    img: string | null
+  }
 }
