@@ -5,4 +5,5 @@ export interface Entry {
   createdAt: Date
   tabs: (TabInformation & { position: number })[]
   isLocked: boolean
+  isFavorite: boolean
 }
