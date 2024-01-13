@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
 import EntryList from './components/EntryList.vue'
-import { TabCard } from './components/Tab'
+import TabCard from './components/Tab/TabCard.vue'
 </script>
 
 <template>

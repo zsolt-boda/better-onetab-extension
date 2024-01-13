@@ -1,3 +1,7 @@
 export { type Entry } from './Entry'
 export { type TabInformation } from './TabInformation'
 export { type PageMetadata } from './PageMetadata'
+export { EntryFilterStrategy } from './EntryFilterStrategy'
+export type { EntryListTransformer } from './EntryListTransformer'
+export { EntrySortStrategy } from './EntrySortStrategy'
+export { TabStyle } from './TabStyle'

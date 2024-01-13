@@ -1,39 +1,52 @@
 import { ENTRIES } from '@/shared/mocks/entries'
-import type { Entry } from '@/shared/types'
+import {
+  EntryFilterStrategy,
+  EntrySortStrategy,
+  TabStyle,
+  type Entry,
+  type EntryListTransformer
+} from '@/shared/types'
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
-import { sumBy, size, values } from 'lodash'
+import { sumBy, size, values, get } from 'lodash'
+import { produce } from 'immer'
 
-const TabStyle = {
-  CARD: 'card',
-  LIST: 'list'
-} as const
+const EntrySortStrategyFunctions: Record<EntrySortStrategy, EntryListTransformer> = {
+  [EntrySortStrategy.NEWEST]: (entries: Entry[]): Entry[] => entries,
+  [EntrySortStrategy.OLDEST]: (entries: Entry[]): Entry[] => entries
+}
 
-type TabStyle = EnumType<typeof TabStyle>
-
-const EntrySortStrategy = {
-  NEWEST: 'Newest to oldest',
-  OLDEST: 'Oldest to newest'
-} as const
-
-type EntrySortStrategy = EnumType<typeof EntrySortStrategy>
-
-const EntryDisplayStrategy = {
-  SHOW_ALL: 'Show all',
-  ONLY_FAVORITE: 'Show favorite'
-} as const
-
-type EntryDisplayStrategy = EnumType<typeof EntryDisplayStrategy>
+const EntryFilterStrategyFunctions: Record<EntryFilterStrategy, EntryListTransformer> = {
+  [EntryFilterStrategy.SHOW_ALL]: (entries: Entry[]): Entry[] => entries,
+  [EntryFilterStrategy.ONLY_FAVORITE]: (entries: Entry[]): Entry[] => entries
+}
 
 export const useTabsStore = defineStore('tabs', () => {
-  const entryDisplayStrategy = ref<EntryDisplayStrategy>(EntryDisplayStrategy.SHOW_ALL)
+  const entryFilterStrategy = ref<EntryFilterStrategy>(EntryFilterStrategy.SHOW_ALL)
   const tabStyle = ref<TabStyle>(TabStyle.CARD)
   const entrySortingStrategy = ref<EntrySortStrategy>(EntrySortStrategy.NEWEST)
   const entries = ref<Record<string, Entry>>(ENTRIES)
 
-  const sortedEntries = computed<Entry[]>(() => values(entries.value))
+  const entriesToShow = computed<Entry[]>(() => {
+    const defaultEntries = values(entries.value)
+
+    const entryFilterFunction: EntryListTransformer = get(
+      EntryFilterStrategyFunctions,
+      entryFilterStrategy.value
+    )
+
+    const entrySortingFunction: EntryListTransformer = get(
+      EntrySortStrategyFunctions,
+      entrySortingStrategy.value
+    )
+    const filteredEntries: Entry[] = entryFilterFunction(defaultEntries)
+    const sortedEntries: Entry[] = entrySortingFunction(filteredEntries)
+
+    return sortedEntries
+  })
+
   const numberOfTabs = computed<number>(() =>
-    sumBy(sortedEntries.value, (entry: Entry) => size(entry.tabs))
+    sumBy(entriesToShow.value, (entry: Entry) => size(entry.tabs))
   )
 
   const setTabStyle = (style: TabStyle) => {
@@ -44,12 +57,14 @@ export const useTabsStore = defineStore('tabs', () => {
     entrySortingStrategy.value = strategy
   }
 
-  const setEntryDisplayStrategy = (strategy: EntryDisplayStrategy) => {
-    entryDisplayStrategy.value = strategy
+  const setEntryDisplayStrategy = (strategy: EntryFilterStrategy) => {
+    entryFilterStrategy.value = strategy
   }
 
   const deleteEntry = (entryId: Entry['id']) => {
-    console.log('Delete', entryId)
+    entries.value = produce(entries.value, (draft) => {
+      delete draft[entryId]
+    })
   }
 
   const restoreEntry = (entryId: Entry['id']) => {
@@ -57,19 +72,23 @@ export const useTabsStore = defineStore('tabs', () => {
   }
 
   const toggleLockOnEntry = (entryId: Entry['id']) => {
-    console.log('Toggle lock', entryId)
+    entries.value = produce(entries.value, (draft) => {
+      draft[entryId].isLocked = !draft[entryId].isLocked
+    })
   }
 
   const toggleFavoriteEntry = (entryId: Entry['id']) => {
-    console.log('Toggle favorite', entryId)
+    entries.value = produce(entries.value, (draft) => {
+      draft[entryId].isFavorite = !draft[entryId].isFavorite
+    })
   }
 
   return {
-    entries: sortedEntries,
+    entries: entriesToShow,
     tabStyle,
     numberOfTabs,
     entrySortingStrategy,
-    entryDisplayStrategy,
+    entryDisplayStrategy: entryFilterStrategy,
     restoreEntry,
     toggleLockOnEntry,
     setTabStyle,
