@@ -1,9 +1,18 @@
+import { ENTRIES } from '@/shared/mocks/entries'
 import type { Entry } from '@/shared/types'
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 
+const TabStyle = {
+  CARD: 'card',
+  LIST: 'list'
+} as const
+
+type TabStyle = EnumType<typeof TabStyle>
+
 export const useTabsStore = defineStore('tabs', () => {
-  const entries = ref<Entry[]>([])
+  const tabStyle = ref<TabStyle>(TabStyle.CARD)
+  const entries = ref<Entry[]>(ENTRIES)
 
   const sortedEntries = computed<Entry[]>(() => entries.value)
 
@@ -15,5 +24,5 @@ export const useTabsStore = defineStore('tabs', () => {
     console.log('Toggle lock', entryId)
   }
 
-  return { entries: sortedEntries, restoreEntry, toggleLockOnEntry }
+  return { entries: sortedEntries, tabStyle, restoreEntry, toggleLockOnEntry }
 })

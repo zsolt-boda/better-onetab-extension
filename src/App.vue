@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
+import EntryList from './components/EntryList.vue'
+import { TabCard } from './components/Tab'
 </script>
 
 <template>
@@ -7,7 +9,11 @@ import { RouterLink, RouterView } from 'vue-router'
     <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
 
     <div class="wrapper">
-      <HelloWorld msg="You did it!" />
+      <entry-list>
+        <template #tab="{ tab }">
+          <tab-card :title="tab.title" :url="tab.url" :meta="tab.meta" :key="tab.title" />
+        </template>
+      </entry-list>
 
       <nav>
         <RouterLink to="/">Home</RouterLink>
