@@ -2,7 +2,7 @@ import { ENTRIES } from '@/shared/mocks/entries'
 import type { Entry } from '@/shared/types'
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
-import { sumBy, size } from 'lodash'
+import { sumBy, size, values } from 'lodash'
 
 const TabStyle = {
   CARD: 'card',
@@ -29,11 +29,11 @@ export const useTabsStore = defineStore('tabs', () => {
   const entryDisplayStrategy = ref<EntryDisplayStrategy>(EntryDisplayStrategy.SHOW_ALL)
   const tabStyle = ref<TabStyle>(TabStyle.CARD)
   const entrySortingStrategy = ref<EntrySortStrategy>(EntrySortStrategy.NEWEST)
-  const entries = ref<Entry[]>(ENTRIES)
+  const entries = ref<Record<string, Entry>>(ENTRIES)
 
-  const sortedEntries = computed<Entry[]>(() => entries.value)
+  const sortedEntries = computed<Entry[]>(() => values(entries.value))
   const numberOfTabs = computed<number>(() =>
-    sumBy(entries.value, (entry: Entry) => size(entry.tabs))
+    sumBy(sortedEntries.value, (entry: Entry) => size(entry.tabs))
   )
 
   const setTabStyle = (style: TabStyle) => {
