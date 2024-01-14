@@ -8,7 +8,7 @@ const tabs = useTabsStore()
 <template>
   <EntryItem v-for="entry in tabs.entriesToShow" :key="entry.id" :entry="entry">
     <div v-for="tab in entry.tabs" :key="tab.title">
-      <slot name="tab" :tab="tab"></slot>
+      <slot name="tab" :tab="tab" :entryId="entry.id"></slot>
     </div>
   </EntryItem>
   <h2 :style="{ textAlign: 'center' }" v-if="tabs.entriesToShow.length === 0">

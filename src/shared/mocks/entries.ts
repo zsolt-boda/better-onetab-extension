@@ -9,6 +9,7 @@ export const ENTRIES: Record<string, Entry> = {
     isFavorite: false,
     tabs: [
       {
+        id: '12',
         title: 'Facebook | Profile',
         url: 'https://facebook.com/me/profile',
         position: 0,
@@ -20,6 +21,7 @@ export const ENTRIES: Record<string, Entry> = {
         }
       },
       {
+        id: '22',
         title: 'Youtube | Minecraft',
         url: 'https://youtube.com/search?v=minecraft',
         position: 1,
@@ -39,6 +41,7 @@ export const ENTRIES: Record<string, Entry> = {
     isFavorite: true,
     tabs: [
       {
+        id: '32',
         title: 'Facebook | Profile',
         url: 'https://facebook.com/me/profile',
         position: 0,
@@ -49,6 +52,7 @@ export const ENTRIES: Record<string, Entry> = {
         }
       },
       {
+        id: '42',
         title: 'Youtube | Minecraft',
         url: 'https://youtube.com/search?v=minecraft',
         position: 1,
@@ -67,6 +71,7 @@ export const ENTRIES: Record<string, Entry> = {
     isFavorite: false,
     tabs: [
       {
+        id: '52',
         title: 'Facebook | Profile',
         url: 'https://facebook.com/me/profile',
         position: 0,
@@ -77,6 +82,7 @@ export const ENTRIES: Record<string, Entry> = {
         }
       },
       {
+        id: '62',
         title: 'Youtube | Minecraft',
         url: 'https://youtube.com/search?v=minecraft',
         position: 1,

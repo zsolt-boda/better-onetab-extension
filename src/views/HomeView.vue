@@ -48,20 +48,24 @@ const sortingOptions = ref([
       </template>
     </PToolbar>
     <entry-list>
-      <template #tab="{ tab }">
+      <template #tab="{ tab, entryId }">
         <tab-card
           v-if="tabs.tabStyle === TabStyle.CARD"
           :title="tab.title"
           :url="tab.url"
           :meta="tab.meta"
           :key="tab.title"
+          :id="tab.id"
+          :entryId="entryId"
         />
         <tab-list
           v-if="tabs.tabStyle === TabStyle.LIST"
           :title="tab.title"
           :url="tab.url"
           :meta="tab.meta"
-          :key="tab.title"
+          :key="tab.id"
+          :id="tab.id"
+          :entryId="entryId"
         />
       </template>
     </entry-list>

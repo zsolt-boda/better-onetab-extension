@@ -1,15 +1,26 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { type TabInformation } from '../../shared/types/'
+import { type Entry, type TabInformation } from '../../shared/types/'
+import { useTabsStore } from '@/stores/tabs'
 
-const props = defineProps<TabInformation>()
+const props = defineProps<TabInformation & { entryId: Entry['id'] }>()
 const pageName = computed(() => new URL(props.url).hostname)
 const description = computed<string>(() => props.meta.description ?? '')
 const imgSrc = computed<string>(() => props.meta.img!)
+
+const tabs = useTabsStore()
+
+const handleDeleteClick = () => {
+  tabs.deleteTab(props.entryId, props.id)
+}
+
+const handleRestoreClick = () => {
+  tabs.restoreTab(props.entryId, props.id)
+}
 </script>
 
 <template>
-  <PCard class="wrapper">
+  <PCard class="wrapper" @click="handleRestoreClick">
     <template #header>
       <img class="img" :src="imgSrc" alt="img" />
     </template>
@@ -26,8 +37,8 @@ const imgSrc = computed<string>(() => props.meta.img!)
     </template>
     <template #footer>
       <div class="actions">
-        <PButton text rounded icon="pi pi-link" />
-        <PButton text rounded icon="pi pi-trash" />
+        <PButton @click.stop="handleRestoreClick" text rounded icon="pi pi-link" />
+        <PButton @click.stop="handleDeleteClick" text rounded icon="pi pi-trash" />
       </div>
     </template>
   </PCard>

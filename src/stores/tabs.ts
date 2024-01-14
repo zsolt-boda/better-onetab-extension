@@ -4,7 +4,8 @@ import {
   EntrySortStrategy,
   TabStyle,
   type Entry,
-  type EntryListTransformer
+  type EntryListTransformer,
+  type TabInformation
 } from '@/shared/types'
 import { defineStore } from 'pinia'
 import { computed, ref, shallowRef } from 'vue'
@@ -76,6 +77,10 @@ export const useTabsStore = defineStore('tabs', () => {
 
   const restoreEntry = (entryId: Entry['id']) => {
     console.log('Restore', entryId)
+
+    if (!get(entries.value, `${entryId}.isLocked`, false)) {
+      deleteEntry(entryId)
+    }
   }
 
   const toggleLockOnEntry = (entryId: Entry['id']) => {
@@ -90,6 +95,26 @@ export const useTabsStore = defineStore('tabs', () => {
     })
   }
 
+  const deleteTab = (entryId: Entry['id'], tabId: TabInformation['id']) => {
+    entries.value = produce(entries.value, (draft) => {
+      const entry = draft[entryId]
+      if (entry) {
+        entry.tabs = entry.tabs.filter((tab) => tab.id !== tabId)
+      }
+    })
+
+    if (size(get(entries.value, `${entryId}.tabs`, [])) === 0) {
+      deleteEntry(entryId)
+    }
+  }
+
+  const restoreTab = (entryId: Entry['id'], tabId: TabInformation['id']) => {
+    console.log('Restore tab', entryId, tabId)
+    if (!get(entries.value, `${entryId}.isLocked`, false)) {
+      deleteTab(entryId, tabId)
+    }
+  }
+
   return {
     entriesToShow,
     tabStyle,
@@ -102,6 +127,8 @@ export const useTabsStore = defineStore('tabs', () => {
     setEntrySortingStrategy,
     toggleFavoriteEntry,
     deleteEntry,
-    setEntryDisplayStrategy
+    setEntryDisplayStrategy,
+    restoreTab,
+    deleteTab
   }
 })
