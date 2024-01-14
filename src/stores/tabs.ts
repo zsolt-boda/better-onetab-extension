@@ -69,7 +69,9 @@ export const useTabsStore = defineStore('tabs', () => {
     entryFilterStrategy.value = strategy
   }
 
-  const deleteEntry = (entryId: Entry['id']) => {
+  const deleteEntry = (entryId: Entry['id'], forced: boolean = false) => {
+    if (!forced && get(entries.value, `${entryId}.isLocked`, false)) return
+
     entries.value = produce(entries.value, (draft) => {
       delete draft[entryId]
     })
@@ -77,10 +79,7 @@ export const useTabsStore = defineStore('tabs', () => {
 
   const restoreEntry = (entryId: Entry['id']) => {
     console.log('Restore', entryId)
-
-    if (!get(entries.value, `${entryId}.isLocked`, false)) {
-      deleteEntry(entryId)
-    }
+    deleteEntry(entryId)
   }
 
   const toggleLockOnEntry = (entryId: Entry['id']) => {
@@ -104,7 +103,7 @@ export const useTabsStore = defineStore('tabs', () => {
     })
 
     if (size(get(entries.value, `${entryId}.tabs`, [])) === 0) {
-      deleteEntry(entryId)
+      deleteEntry(entryId, true)
     }
   }
 

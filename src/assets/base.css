@@ -19,3 +19,8 @@ body {
         display: none;
     }
 }
+
+#app {
+    width: 475px;
+    height: 900px;
+}
