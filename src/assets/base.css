@@ -1,3 +1,21 @@
 body {
     margin-top: 0;
 }
+
+.mobile {
+    display: none;
+}
+
+.desktop {
+    display: block;
+}
+
+@media only screen and (max-width: 600px){
+    .mobile {
+        display: block;
+    }
+
+    .desktop {
+        display: none;
+    }
+}

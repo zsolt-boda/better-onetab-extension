@@ -13,7 +13,8 @@ export const ENTRIES: Record<string, Entry> = {
         url: 'https://facebook.com/me/profile',
         position: 0,
         meta: {
-          description: null,
+          description:
+            'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut hendrerit egestas accumsan. Sed eget rhoncus dolor. Proin aliquam auctor sem, non luctus nunc varius eget. Etiam mollis ante et pharetra pretium. Aliquam rutrum sem urna, quis aliquet eros sagittis eu. Pellentesque quis fermentum mi. In facilisis accumsan massa. Vestibulum hendrerit libero condimentum nunc scelerisque varius. Nam eu mi cursus dolor ullamcorper dapibus ac ut felis. Nam laoreet sodales arcu, at pulvinar lectus volutpat non. Pellentesque varius neque eu tellus rhoncus, tempor efficitur ipsum volutpat. Pellentesque interdum dolor felis. Aenean dictum lorem risus, nec facilisis nisi vestibulum id. Aenean et velit vel tortor fringilla scelerisque',
           img: 'https://www.primefaces.org/static/social/primevue-preview.jpg',
           status: 'loading'
         }
@@ -23,7 +24,8 @@ export const ENTRIES: Record<string, Entry> = {
         url: 'https://youtube.com/search?v=minecraft',
         position: 1,
         meta: {
-          description: null,
+          description:
+            'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut hendrerit egestas accumsan. Sed eget rhoncus dolor. Proin aliquam auctor sem, non luctus nunc varius eget. Etiam mollis ante et pharetra pretium. Aliquam rutrum sem urna, quis aliquet eros sagittis eu. Pellentesque quis fermentum mi. In facilisis accumsan massa. Vestibulum hendrerit libero condimentum nunc scelerisque varius. Nam eu mi cursus dolor ullamcorper dapibus ac ut felis. Nam laoreet sodales arcu, at pulvinar lectus volutpat non. Pellentesque varius neque eu tellus rhoncus, tempor efficitur ipsum volutpat. Pellentesque interdum dolor felis. Aenean dictum lorem risus, nec facilisis nisi vestibulum id. Aenean et velit vel tortor fringilla scelerisque',
           img: 'https://www.primefaces.org/static/social/primevue-preview.jpg',
           status: 'error'
         }

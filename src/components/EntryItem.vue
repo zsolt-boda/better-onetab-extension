@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { Entry } from '@/shared/types'
 import { useTabsStore } from '@/stores/tabs'
-import { format } from 'date-fns'
+import { differenceInHours, differenceInMinutes, format, isToday, isYesterday } from 'date-fns'
 import { computed } from 'vue'
 
 const props = defineProps<{ entry: Entry }>()
@@ -32,8 +32,26 @@ const handleDeleteClick = () => {
   tabs.deleteEntry(props.entry.id)
 }
 
-const createdAtTimeString = computed<string>(() => format(props.entry.createdAt, 'yyyy-MM-dd'))
 const numberOfTabsInEntry = computed<number>(() => props.entry.tabs.length)
+
+const formatDate = (date: Date): string => {
+  if (isToday(date)) {
+    const diffMinutes = differenceInMinutes(new Date(), date)
+    if (diffMinutes < 60) {
+      return `${diffMinutes} minutes ago`
+    }
+    const diffHours = differenceInHours(new Date(), date)
+    return `${diffHours} hours ago`
+  }
+
+  if (isYesterday(date)) {
+    return 'Yesterday'
+  }
+
+  return format(date, 'yyyy-MM-dd')
+}
+
+const createdAtTimeString = computed<string>(() => formatDate(props.entry.createdAt))
 </script>
 
 <template>
@@ -42,8 +60,8 @@ const numberOfTabsInEntry = computed<number>(() => props.entry.tabs.length)
       <div class="header">
         <PButton @click="handleFavoriteClick" text rounded :icon="favoriteIconSrc" />
         <div>Created: {{ createdAtTimeString }}</div>
-        <span>-</span>
-        <div>Tabs: {{ numberOfTabsInEntry }}</div>
+        <span class="desktop">-</span>
+        <div class="desktop">Tabs: {{ numberOfTabsInEntry }}</div>
       </div>
     </template>
     <template #icons>
