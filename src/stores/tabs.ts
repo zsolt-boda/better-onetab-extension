@@ -7,7 +7,7 @@ import {
   type EntryListTransformer
 } from '@/shared/types'
 import { defineStore } from 'pinia'
-import { computed, ref } from 'vue'
+import { computed, ref, shallowRef } from 'vue'
 import { sumBy, size, values, get, filter } from 'lodash'
 import { produce } from 'immer'
 import { useToast } from 'primevue/usetoast'
@@ -32,7 +32,7 @@ export const useTabsStore = defineStore('tabs', () => {
   const entryFilterStrategy = ref<EntryFilterStrategy>(EntryFilterStrategy.SHOW_ALL)
   const tabStyle = ref<TabStyle>(TabStyle.LIST)
   const entrySortingStrategy = ref<EntrySortStrategy>(EntrySortStrategy.NEWEST)
-  const entries = ref<Record<string, Entry>>(ENTRIES)
+  const entries = shallowRef<Record<string, Entry>>(ENTRIES)
 
   const entriesToShow = computed<Entry[]>(() => {
     const defaultEntries = values(entries.value)
