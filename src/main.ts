@@ -27,6 +27,8 @@ import App from './App.vue'
 import router from './router'
 
 import 'primevue/resources/themes/arya-green/theme.css'
+import { isRunningAsChromeExtension } from './shared/extension/isRunningAsChromeExtension'
+import { isPopup } from './shared/extension/getContext'
 
 const app = createApp(App)
 
@@ -55,3 +57,10 @@ app.component('PScrollTop', ScrollTop)
 app.component('PChip', Chip)
 
 app.mount('#app')
+
+if (isRunningAsChromeExtension() && isPopup()) {
+  const appElement = document.getElementById('app')
+  if (appElement) {
+    appElement.classList.add('extension-mode')
+  }
+}

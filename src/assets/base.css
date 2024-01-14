@@ -21,6 +21,10 @@ body {
 }
 
 #app {
+
+}
+
+.extension-mode {
     width: 475px;
     height: 900px;
 }

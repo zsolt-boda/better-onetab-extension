@@ -1,6 +1,17 @@
 {
   "manifest_version": 3,
+  "author": "Zsolt Boda",
+  "homepage_url": "https://zsoltboda.com",
   "name": "Better OneTab",
+  "description": "This is OneTab but with better UI",
   "version": "1.0.0",
-  "action": { "default_popup": "index.html" }
+  "action": { "default_popup": "index.html" },
+  "background": {
+    "service_worker": "src/background.ts",
+    "type": "module"
+  },
+  "chrome_url_overrides": {
+    "newtab": "index.html"
+  },
+  "permissions": ["activeTab", "tabs", "storage", "unlimitedStorage"]
 }
