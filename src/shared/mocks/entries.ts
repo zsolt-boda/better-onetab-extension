@@ -14,7 +14,7 @@ export const ENTRIES: Record<string, Entry> = {
         position: 0,
         meta: {
           description: null,
-          img: null,
+          img: 'https://www.primefaces.org/static/social/primevue-preview.jpg',
           status: 'loading'
         }
       },
@@ -24,7 +24,7 @@ export const ENTRIES: Record<string, Entry> = {
         position: 1,
         meta: {
           description: null,
-          img: null,
+          img: 'https://www.primefaces.org/static/social/primevue-preview.jpg',
           status: 'error'
         }
       }
@@ -42,7 +42,7 @@ export const ENTRIES: Record<string, Entry> = {
         position: 0,
         meta: {
           description: null,
-          img: null,
+          img: 'https://www.primefaces.org/static/social/primevue-preview.jpg',
           status: 'loading'
         }
       },
@@ -52,7 +52,7 @@ export const ENTRIES: Record<string, Entry> = {
         position: 1,
         meta: {
           description: null,
-          img: null,
+          img: 'https://www.primefaces.org/static/social/primevue-preview.jpg',
           status: 'error'
         }
       }
@@ -70,7 +70,7 @@ export const ENTRIES: Record<string, Entry> = {
         position: 0,
         meta: {
           description: null,
-          img: null,
+          img: 'https://www.primefaces.org/static/social/primevue-preview.jpg',
           status: 'loading'
         }
       },
@@ -80,7 +80,7 @@ export const ENTRIES: Record<string, Entry> = {
         position: 1,
         meta: {
           description: null,
-          img: null,
+          img: 'https://www.primefaces.org/static/social/primevue-preview.jpg',
           status: 'error'
         }
       }

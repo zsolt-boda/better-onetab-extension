@@ -8,22 +8,29 @@ import {
 } from '@/shared/types'
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
-import { sumBy, size, values, get } from 'lodash'
+import { sumBy, size, values, get, filter } from 'lodash'
 import { produce } from 'immer'
+import { useToast } from 'primevue/usetoast'
+import { compareAsc, compareDesc } from 'date-fns'
 
 const EntrySortStrategyFunctions: Record<EntrySortStrategy, EntryListTransformer> = {
-  [EntrySortStrategy.NEWEST]: (entries: Entry[]): Entry[] => entries,
-  [EntrySortStrategy.OLDEST]: (entries: Entry[]): Entry[] => entries
+  [EntrySortStrategy.NEWEST]: (entries: Entry[]): Entry[] =>
+    entries.sort((a, b) => compareDesc(new Date(a.createdAt), new Date(b.createdAt))),
+  [EntrySortStrategy.OLDEST]: (entries: Entry[]): Entry[] =>
+    entries.sort((a, b) => compareAsc(new Date(a.createdAt), new Date(b.createdAt)))
 }
 
 const EntryFilterStrategyFunctions: Record<EntryFilterStrategy, EntryListTransformer> = {
   [EntryFilterStrategy.SHOW_ALL]: (entries: Entry[]): Entry[] => entries,
-  [EntryFilterStrategy.ONLY_FAVORITE]: (entries: Entry[]): Entry[] => entries
+  [EntryFilterStrategy.ONLY_FAVORITE]: (entries: Entry[]): Entry[] =>
+    filter(entries, { isFavorite: true })
 }
 
 export const useTabsStore = defineStore('tabs', () => {
+  const toast = useToast()
+
   const entryFilterStrategy = ref<EntryFilterStrategy>(EntryFilterStrategy.SHOW_ALL)
-  const tabStyle = ref<TabStyle>(TabStyle.CARD)
+  const tabStyle = ref<TabStyle>(TabStyle.LIST)
   const entrySortingStrategy = ref<EntrySortStrategy>(EntrySortStrategy.NEWEST)
   const entries = ref<Record<string, Entry>>(ENTRIES)
 
@@ -84,11 +91,11 @@ export const useTabsStore = defineStore('tabs', () => {
   }
 
   return {
-    entries: entriesToShow,
+    entriesToShow,
     tabStyle,
     numberOfTabs,
     entrySortingStrategy,
-    entryDisplayStrategy: entryFilterStrategy,
+    entryFilterStrategy,
     restoreEntry,
     toggleLockOnEntry,
     setTabStyle,
