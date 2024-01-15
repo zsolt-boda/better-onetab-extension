@@ -1,12 +1,4 @@
-# better-onetab-extension
-
-## Goals
-[] Page and popup view
-[] Send this page and send all page (and restore)
-[] Store tab information
-[] Import and export tabs list
-[] Fetch metadata of the page or use the defaults
-
+# Better OneTab Extension
 
 This template should help get you started developing with Vue 3 in Vite.
 
