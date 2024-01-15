@@ -13,5 +13,11 @@
   "chrome_url_overrides": {
     "newtab": "index.html"
   },
+  "icons": {
+    "48": "public/icon48.png",
+    "72": "public/icon72.png",
+    "144": "public/icon144.png",
+    "512": "public/icon512.png"
+  },
   "permissions": ["activeTab", "tabs", "storage", "unlimitedStorage", "contextMenus"]
 }
