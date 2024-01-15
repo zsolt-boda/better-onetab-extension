@@ -1,3 +1,4 @@
+import { createChromeEntriesRepository } from './../shared/entries/ChromeEntriesRepository'
 import { ENTRIES } from '@/shared/mocks/entries'
 import {
   EntryFilterStrategy,
@@ -8,11 +9,12 @@ import {
   type TabInformation
 } from '@/shared/types'
 import { defineStore } from 'pinia'
-import { computed, ref, shallowRef } from 'vue'
-import { sumBy, size, values, get, filter } from 'lodash'
+import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
+import { sumBy, size, values, get, filter, find, map } from 'lodash'
 import { produce } from 'immer'
-import { useToast } from 'primevue/usetoast'
 import { compareAsc, compareDesc } from 'date-fns'
+import { JsonStorageSerializer } from '@/shared/extension/StorageSerializer/JsonStorageSerializer'
+import type { EntriesRepository } from '@/shared/entries'
 
 const EntrySortStrategyFunctions: Record<EntrySortStrategy, EntryListTransformer> = {
   [EntrySortStrategy.NEWEST]: (entries: Entry[]): Entry[] =>
@@ -27,8 +29,13 @@ const EntryFilterStrategyFunctions: Record<EntryFilterStrategy, EntryListTransfo
     filter(entries, { isFavorite: true })
 }
 
+type Message = {
+  action: string
+  data: Record<string, Entry>
+}
+
 export const useTabsStore = defineStore('tabs', () => {
-  const toast = useToast()
+  const entriesRepository: EntriesRepository = createChromeEntriesRepository(JsonStorageSerializer)
 
   const entryFilterStrategy = ref<EntryFilterStrategy>(EntryFilterStrategy.SHOW_ALL)
   const tabStyle = ref<TabStyle>(TabStyle.LIST)
@@ -78,7 +85,8 @@ export const useTabsStore = defineStore('tabs', () => {
   }
 
   const restoreEntry = (entryId: Entry['id']) => {
-    console.log('Restore', entryId)
+    const urls: string[] = map(get(entries.value, [entryId, 'tabs'], []), 'url')
+    entriesRepository.restoreTabs(urls)
     deleteEntry(entryId)
   }
 
@@ -108,11 +116,36 @@ export const useTabsStore = defineStore('tabs', () => {
   }
 
   const restoreTab = (entryId: Entry['id'], tabId: TabInformation['id']) => {
-    console.log('Restore tab', entryId, tabId)
+    const tab: TabInformation = find(get(entries.value, [entryId, 'tabs'], []), { id: tabId })!
+    entriesRepository.restoreTabs([tab.url])
     if (!get(entries.value, `${entryId}.isLocked`, false)) {
       deleteTab(entryId, tabId)
     }
   }
+
+  const chromeListener = (
+    message: Message,
+    sender: chrome.runtime.MessageSender,
+    sendResponse: (response?: any) => void
+  ) => {
+    if (message.action === 'entrySaved') {
+      entriesRepository.loadEntries().then((r) => (entries.value = r))
+    }
+  }
+
+  onMounted(() => {
+    entriesRepository.loadEntries().then((r) => (entries.value = r))
+    chrome.runtime.onMessage.addListener(chromeListener)
+  })
+
+  onBeforeUnmount(() => {
+    chrome.runtime.onMessage.removeListener(chromeListener)
+  })
+
+  // TODO: Fix double save when entries first loaded
+  watch(entries, async (newEntries) => {
+    await entriesRepository.saveEntries(newEntries)
+  })
 
   return {
     entriesToShow,

@@ -13,5 +13,5 @@
   "chrome_url_overrides": {
     "newtab": "index.html"
   },
-  "permissions": ["activeTab", "tabs", "storage", "unlimitedStorage"]
+  "permissions": ["activeTab", "tabs", "storage", "unlimitedStorage", "contextMenus"]
 }

@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 import { isRunningAsChromeExtension } from '../shared/extension/isRunningAsChromeExtension'
 
 export const usePlatformStore = defineStore('platform', () => {
