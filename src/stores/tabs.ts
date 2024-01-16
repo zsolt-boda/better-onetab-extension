@@ -1,5 +1,3 @@
-import { createChromeEntriesRepository } from './../shared/entries/ChromeEntriesRepository'
-import { ENTRIES } from '@/shared/mocks/entries'
 import {
   EntryFilterStrategy,
   EntrySortStrategy,
@@ -9,12 +7,12 @@ import {
   type TabInformation
 } from '@/shared/types'
 import { defineStore } from 'pinia'
-import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
+import { computed, onMounted, ref, shallowRef, watch } from 'vue'
 import { sumBy, size, values, get, filter, find, map } from 'lodash'
 import { produce } from 'immer'
 import { compareAsc, compareDesc } from 'date-fns'
-import { JsonStorageSerializer } from '@/shared/extension/StorageSerializer/JsonStorageSerializer'
-import type { EntriesRepository } from '@/shared/entries'
+import type { EntriesRepository } from '@/shared/entries/EntriesRepository'
+import { createEntriesRepository } from '@/shared/entries'
 
 const EntrySortStrategyFunctions: Record<EntrySortStrategy, EntryListTransformer> = {
   [EntrySortStrategy.NEWEST]: (entries: Entry[]): Entry[] =>
@@ -29,18 +27,24 @@ const EntryFilterStrategyFunctions: Record<EntryFilterStrategy, EntryListTransfo
     filter(entries, { isFavorite: true })
 }
 
-type Message = {
-  action: string
-  data: Record<string, Entry>
-}
-
 export const useTabsStore = defineStore('tabs', () => {
-  const entriesRepository: EntriesRepository = createChromeEntriesRepository(JsonStorageSerializer)
-
   const entryFilterStrategy = ref<EntryFilterStrategy>(EntryFilterStrategy.SHOW_ALL)
   const tabStyle = ref<TabStyle>(TabStyle.LIST)
   const entrySortingStrategy = ref<EntrySortStrategy>(EntrySortStrategy.NEWEST)
-  const entries = shallowRef<Record<string, Entry>>(ENTRIES)
+  const entries = shallowRef<Record<string, Entry>>({})
+
+  const entriesRepository: EntriesRepository = createEntriesRepository(entries)
+
+  entriesRepository.init()
+
+  onMounted(() => {
+    entriesRepository.loadEntries().then((r) => (entries.value = r))
+  })
+
+  // TODO: Fix double save when entries first loaded
+  watch(entries, async (newEntries) => {
+    await entriesRepository.saveEntries(newEntries)
+  })
 
   const entriesToShow = computed<Entry[]>(() => {
     const defaultEntries = values(entries.value)
@@ -122,30 +126,6 @@ export const useTabsStore = defineStore('tabs', () => {
       deleteTab(entryId, tabId)
     }
   }
-
-  const chromeListener = (
-    message: Message,
-    sender: chrome.runtime.MessageSender,
-    sendResponse: (response?: any) => void
-  ) => {
-    if (message.action === 'entrySaved') {
-      entriesRepository.loadEntries().then((r) => (entries.value = r))
-    }
-  }
-
-  onMounted(() => {
-    entriesRepository.loadEntries().then((r) => (entries.value = r))
-    chrome.runtime.onMessage.addListener(chromeListener)
-  })
-
-  onBeforeUnmount(() => {
-    chrome.runtime.onMessage.removeListener(chromeListener)
-  })
-
-  // TODO: Fix double save when entries first loaded
-  watch(entries, async (newEntries) => {
-    await entriesRepository.saveEntries(newEntries)
-  })
 
   return {
     entriesToShow,

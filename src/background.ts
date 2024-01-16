@@ -5,9 +5,12 @@ import { v4 as generateId } from 'uuid'
 import { JsonStorageSerializer } from './shared/extension/StorageSerializer/JsonStorageSerializer'
 import { ExtensionMessage } from './shared/extension/ExtensionMessage'
 import { type TabObject, toTabObject } from './shared/extension/TabObject'
-import { createChromeEntriesRepository, type EntriesRepository } from './shared/entries'
+import type { EntriesRepository } from './shared/entries/EntriesRepository'
+import { createChromeEntriesRepository } from './shared/entries/ChromeEntriesRepository'
 
-const entriesRepository: EntriesRepository = createChromeEntriesRepository(JsonStorageSerializer)
+const entriesRepository: EntriesRepository = createChromeEntriesRepository({
+  serializer: JsonStorageSerializer
+})
 
 const saveEntry = async (tabs: TabObject[]) => {
   const entryId: Entry['id'] = generateId()

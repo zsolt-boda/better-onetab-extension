@@ -3,11 +3,23 @@ import { STORAGE_ENTRY_KEY } from '../extension'
 import type { StorageSerializer } from '../extension/StorageSerializer/StorageSerializer'
 import type { Entry } from '../types'
 import type { EntriesRepository } from './EntriesRepository'
+import { onBeforeUnmount, onMounted, type Ref } from 'vue'
 
-export const createChromeEntriesRepository = (
+interface Props {
   serializer: StorageSerializer
-): EntriesRepository => ({
-  loadEntries: async (): Promise<Record<string, Entry>> => {
+  entriesRef?: Ref<Record<string, Entry>>
+}
+
+export const createChromeEntriesRepository = ({
+  serializer,
+  entriesRef
+}: Props): EntriesRepository => {
+  type Message = {
+    action: string
+    data: Record<string, Entry>
+  }
+
+  const loadEntries = async (): Promise<Record<string, Entry>> => {
     let entries: Record<string, Entry> = {}
     try {
       const result = await chrome.storage.local.get(STORAGE_ENTRY_KEY)
@@ -16,18 +28,46 @@ export const createChromeEntriesRepository = (
       console.error('Error while loading entries', error)
     }
     return entries
-  },
-  saveEntries: async (entries: Record<string, Entry>) => {
+  }
+
+  const saveEntries = async (entries: Record<string, Entry>) => {
     try {
       await chrome.storage.local.set({ [STORAGE_ENTRY_KEY]: serializer.dump(entries) })
     } catch (error) {
       console.error('Error while saving entries', error)
     }
-  },
+  }
 
-  restoreTabs: async (urls: string[]) => {
+  const restoreTabs = async (urls: string[]) => {
     forEach(urls, (url: string) => {
       chrome.tabs.create({ url })
     })
   }
-})
+
+  const chromeListener = (
+    message: Message,
+    sender: chrome.runtime.MessageSender,
+    sendResponse: (response?: any) => void
+  ) => {
+    if (message.action === 'entrySaved' && !!entriesRef) {
+      loadEntries().then((r) => (entriesRef.value = r))
+    }
+  }
+
+  const init = () => {
+    onBeforeUnmount(() => {
+      onMounted(() => {
+        chrome.runtime.onMessage.addListener(chromeListener)
+      })
+
+      chrome.runtime.onMessage.removeListener(chromeListener)
+    })
+  }
+
+  return {
+    init,
+    loadEntries,
+    restoreTabs,
+    saveEntries
+  }
+}
