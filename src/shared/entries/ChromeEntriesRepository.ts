@@ -4,6 +4,7 @@ import type { StorageSerializer } from '../extension/StorageSerializer/StorageSe
 import type { Entry } from '../types'
 import type { EntriesRepository } from './EntriesRepository'
 import { onBeforeUnmount, onMounted, type Ref } from 'vue'
+import { ExtensionMessage } from '../extension/ExtensionMessage'
 
 interface Props {
   serializer: StorageSerializer
@@ -33,6 +34,7 @@ export const createChromeEntriesRepository = ({
   const saveEntries = async (entries: Record<string, Entry>) => {
     try {
       await chrome.storage.local.set({ [STORAGE_ENTRY_KEY]: serializer.dump(entries) })
+      await chrome.runtime.sendMessage({ action: ExtensionMessage.ENTRY_SAVED, data: entries })
     } catch (error) {
       console.error('Error while saving entries', error)
     }
@@ -55,11 +57,11 @@ export const createChromeEntriesRepository = ({
   }
 
   const init = () => {
-    onBeforeUnmount(() => {
-      onMounted(() => {
-        chrome.runtime.onMessage.addListener(chromeListener)
-      })
+    onMounted(() => {
+      chrome.runtime.onMessage.addListener(chromeListener)
+    })
 
+    onBeforeUnmount(() => {
       chrome.runtime.onMessage.removeListener(chromeListener)
     })
   }

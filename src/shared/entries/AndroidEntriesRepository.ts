@@ -3,10 +3,13 @@ import { forEach } from 'lodash'
 import type { StorageSerializer } from '../extension/StorageSerializer/StorageSerializer'
 import type { Entry } from '../types'
 import type { EntriesRepository } from './EntriesRepository'
-import { type Ref } from 'vue'
+import { onBeforeMount, onMounted, type Ref } from 'vue'
 import { ENTRIES } from '../mocks/entries'
 import { Browser } from '@capacitor/browser'
 import { Storage } from '@capacitor/storage'
+import { App, type URLOpenListenerEvent } from '@capacitor/app'
+import { createEntry } from './createEntry'
+import type { TabObject } from '../extension/TabObject'
 
 interface Props {
   serializer: StorageSerializer
@@ -42,7 +45,35 @@ export const createAndroidEntriesRepository = ({ serializer }: Props): EntriesRe
     })
   }
 
-  const init = () => {}
+  const handleAppUrlOpen = async (event: URLOpenListenerEvent) => {
+    console.error('handling')
+    const tab: TabObject = {
+      favIconUrl: '',
+      title: 'This is a tab',
+      url: event.url
+    }
+    const { entry, entryId } = createEntry([tab])
+
+    let entries: Record<string, Entry> = {}
+    try {
+      entries = await loadEntries()
+      entries[entryId] = entry
+      await saveEntries(entries)
+    } catch (error) {
+      console.error('There was an error while saving shared url')
+    }
+  }
+
+  const init = () => {
+    onMounted(() => {
+      console.error('Mounted')
+      App.addListener('appUrlOpen', handleAppUrlOpen)
+    })
+
+    onBeforeMount(() => {
+      App.removeAllListeners()
+    })
+  }
 
   return {
     init,

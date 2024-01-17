@@ -1,49 +1,15 @@
-import type { Entry } from './shared/types/Entry'
 import { filter, forEach, get, map, values } from 'lodash'
 import { ExtensionCommand } from './shared/extension'
-import { v4 as generateId } from 'uuid'
 import { JsonStorageSerializer } from './shared/extension/StorageSerializer/JsonStorageSerializer'
-import { ExtensionMessage } from './shared/extension/ExtensionMessage'
 import { type TabObject, toTabObject } from './shared/extension/TabObject'
-import type { EntriesRepository } from './shared/entries/EntriesRepository'
 import { createChromeEntriesRepository } from './shared/entries/ChromeEntriesRepository'
+import { createSaveEntry } from './shared/entries/createSaveEntry'
 
-const entriesRepository: EntriesRepository = createChromeEntriesRepository({
-  serializer: JsonStorageSerializer
+const saveEntry = createSaveEntry({
+  entriesRepository: createChromeEntriesRepository({
+    serializer: JsonStorageSerializer
+  })
 })
-
-const saveEntry = async (tabs: TabObject[]) => {
-  const entryId: Entry['id'] = generateId()
-
-  const entry: Entry = {
-    id: entryId,
-    createdAt: new Date(),
-    isFavorite: false,
-    isLocked: false,
-    tabs: map(tabs, (tab: TabObject) => ({
-      id: generateId(),
-      title: tab.title,
-      url: tab.url,
-      meta: {
-        status: 'idle',
-        description: '',
-        img: ''
-      }
-    }))
-  }
-
-  let entries: Record<string, Entry> = {}
-
-  try {
-    entries = await entriesRepository.loadEntries()
-    entries[entryId] = entry
-    await entriesRepository.saveEntries(entries)
-
-    await chrome.runtime.sendMessage({ action: ExtensionMessage.ENTRY_SAVED, data: entries })
-  } catch (error) {
-    console.error('Error while loading entries', error)
-  }
-}
 
 const handleSendAllExpectCurrentCommand = async (currentTab: chrome.tabs.Tab) => {
   try {
