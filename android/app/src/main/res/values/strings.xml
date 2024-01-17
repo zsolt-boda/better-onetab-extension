@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">better-onetab-extension</string>
-    <string name="title_activity_main">better-onetab-extension</string>
+    <string name="app_name">Better OneTab</string>
+    <string name="title_activity_main">Better OneTab</string>
     <string name="package_name">better.onetab.extension</string>
     <string name="custom_url_scheme">better.onetab.extension</string>
 </resources>
