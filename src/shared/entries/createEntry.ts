@@ -6,6 +6,9 @@ import { type TabObject } from '../extension/TabObject'
 export const createEntry = (tabs: TabObject[]): { entry: Entry; entryId: string } => {
   const entryId: Entry['id'] = generateId()
 
+  // TODO: use better default image
+  const DEFAULT_IMG = 'https://www.primefaces.org/static/social/primevue-preview.jpg'
+
   const entry: Entry = {
     id: entryId,
     createdAt: new Date(),
@@ -18,7 +21,7 @@ export const createEntry = (tabs: TabObject[]): { entry: Entry; entryId: string 
       meta: {
         status: 'idle',
         description: '',
-        img: ''
+        img: DEFAULT_IMG
       }
     }))
   }
