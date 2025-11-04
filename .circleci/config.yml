@@ -3,214 +3,146 @@
 
 version: 2.1
 
-# Define pipeline parameters to receive Vercel webhook payload data
-# Based on: https://vercel.com/docs/webhooks/webhooks-api#deployment.succeeded
-parameters:
-  # Top-level webhook fields
-  webhook-id:
-    type: string
-    default: ""
-  event-type:
-    type: string
-    default: "deployment.succeeded"
-  created-at:
-    type: integer
-    default: 0
-  region:
-    type: string
-    default: ""
-  
-  # Deployment payload fields
-  deployment-id:
-    type: string
-    default: ""
-  deployment-url:
-    type: string
-    default: ""
-  deployment-name:
-    type: string
-    default: ""
-  deployment-state:
-    type: string
-    default: ""
-  deployment-target:
-    type: string
-    default: ""
-  deployment-type:
-    type: string
-    default: ""
-  deployment-created-at:
-    type: integer
-    default: 0
-  deployment-ready:
-    type: integer
-    default: 0
-  
-  # Project information
-  project-id:
-    type: string
-    default: ""
-  project-name:
-    type: string
-    default: ""
-  
-  # User/Team information
-  user-id:
-    type: string
-    default: ""
-  user-username:
-    type: string
-    default: ""
-  team-id:
-    type: string
-    default: ""
-  team-slug:
-    type: string
-    default: ""
-  
-  # Links and metadata
-  deployment-links-deployment:
-    type: string
-    default: ""
-  deployment-links-project:
-    type: string
-    default: ""
-  
-  # Git information
-  deployment-meta-git-commit-sha:
-    type: string
-    default: ""
-  deployment-meta-git-commit-message:
-    type: string
-    default: ""
-  deployment-meta-git-commit-author:
-    type: string
-    default: ""
-  deployment-meta-git-commit-ref:
-    type: string
-    default: ""
-  deployment-meta-git-repo-id:
-    type: string
-    default: ""
-  deployment-meta-git-repo-owner:
-    type: string
-    default: ""
-  deployment-meta-git-repo-slug:
-    type: string
-    default: ""
-  
-  # Full payload as JSON string (for complete data)
-  full-payload:
-    type: string
-    default: "{}"
-
 # Define a job to display the Vercel webhook payload
 jobs:
-  display-vercel-deployment:
+  display-vercel-webhook:
+    # Specify the execution environment
     docker:
       - image: cimg/base:current
 
+    # Add steps to the job
     steps:
       - checkout
       
       - run:
-          name: "Display Vercel Webhook Event Information"
+          name: "Display Raw Webhook Body"
           command: |
             echo "=========================================="
-            echo "VERCEL WEBHOOK EVENT"
+            echo "RAW WEBHOOK BODY"
             echo "=========================================="
-            echo ""
-            echo "Event ID: << pipeline.parameters.webhook-id >>"
-            echo "Event Type: << pipeline.parameters.event-type >>"
-            echo "Created At: << pipeline.parameters.created-at >>"
-            echo "Region: << pipeline.parameters.region >>"
+            echo '<< pipeline.trigger_parameters.webhook.body >>'
             echo ""
             echo "=========================================="
       
       - run:
-          name: "Display Deployment Information"
+          name: "Display Formatted Webhook Payload"
           command: |
             echo "=========================================="
-            echo "DEPLOYMENT DETAILS"
+            echo "FORMATTED WEBHOOK PAYLOAD (JSON)"
             echo "=========================================="
-            echo ""
-            echo "Deployment ID: << pipeline.parameters.deployment-id >>"
-            echo "Deployment URL: << pipeline.parameters.deployment-url >>"
-            echo "Deployment Name: << pipeline.parameters.deployment-name >>"
-            echo "State: << pipeline.parameters.deployment-state >>"
-            echo "Target: << pipeline.parameters.deployment-target >>"
-            echo "Type: << pipeline.parameters.deployment-type >>"
-            echo "Created At: << pipeline.parameters.deployment-created-at >>"
-            echo "Ready At: << pipeline.parameters.deployment-ready >>"
+            echo '<< pipeline.trigger_parameters.webhook.body >>' | jq '.'
             echo ""
             echo "=========================================="
       
       - run:
-          name: "Display Project Information"
+          name: "Extract Vercel Event Details"
           command: |
             echo "=========================================="
-            echo "PROJECT DETAILS"
+            echo "VERCEL EVENT DETAILS"
             echo "=========================================="
-            echo ""
-            echo "Project ID: << pipeline.parameters.project-id >>"
-            echo "Project Name: << pipeline.parameters.project-name >>"
+            
+            WEBHOOK_BODY='<< pipeline.trigger_parameters.webhook.body >>'
+            
+            EVENT_ID=$(echo "$WEBHOOK_BODY" | jq -r '.id // "N/A"')
+            EVENT_TYPE=$(echo "$WEBHOOK_BODY" | jq -r '.type // "N/A"')
+            CREATED_AT=$(echo "$WEBHOOK_BODY" | jq -r '.createdAt // "N/A"')
+            REGION=$(echo "$WEBHOOK_BODY" | jq -r '.region // "N/A"')
+            
+            echo "Event ID: $EVENT_ID"
+            echo "Event Type: $EVENT_TYPE"
+            echo "Created At: $CREATED_AT"
+            echo "Region: $REGION"
             echo ""
             echo "=========================================="
       
       - run:
-          name: "Display Git Information"
+          name: "Extract Deployment Information"
+          command: |
+            echo "=========================================="
+            echo "DEPLOYMENT INFORMATION"
+            echo "=========================================="
+            
+            WEBHOOK_BODY='<< pipeline.trigger_parameters.webhook.body >>'
+            
+            DEPLOYMENT_ID=$(echo "$WEBHOOK_BODY" | jq -r '.payload.deployment.id // "N/A"')
+            DEPLOYMENT_URL=$(echo "$WEBHOOK_BODY" | jq -r '.payload.deployment.url // "N/A"')
+            DEPLOYMENT_NAME=$(echo "$WEBHOOK_BODY" | jq -r '.payload.deployment.name // "N/A"')
+            DEPLOYMENT_STATE=$(echo "$WEBHOOK_BODY" | jq -r '.payload.deployment.state // "N/A"')
+            DEPLOYMENT_TARGET=$(echo "$WEBHOOK_BODY" | jq -r '.payload.deployment.target // "N/A"')
+            DEPLOYMENT_TYPE=$(echo "$WEBHOOK_BODY" | jq -r '.payload.deployment.type // "N/A"')
+            
+            echo "Deployment ID: $DEPLOYMENT_ID"
+            echo "Deployment URL: https://$DEPLOYMENT_URL"
+            echo "Deployment Name: $DEPLOYMENT_NAME"
+            echo "State: $DEPLOYMENT_STATE"
+            echo "Target: $DEPLOYMENT_TARGET"
+            echo "Type: $DEPLOYMENT_TYPE"
+            echo ""
+            echo "=========================================="
+      
+      - run:
+          name: "Extract Project Information"
+          command: |
+            echo "=========================================="
+            echo "PROJECT INFORMATION"
+            echo "=========================================="
+            
+            WEBHOOK_BODY='<< pipeline.trigger_parameters.webhook.body >>'
+            
+            PROJECT_ID=$(echo "$WEBHOOK_BODY" | jq -r '.payload.project.id // "N/A"')
+            PROJECT_NAME=$(echo "$WEBHOOK_BODY" | jq -r '.payload.project.name // "N/A"')
+            
+            echo "Project ID: $PROJECT_ID"
+            echo "Project Name: $PROJECT_NAME"
+            echo ""
+            echo "=========================================="
+      
+      - run:
+          name: "Extract Git Information"
           command: |
             echo "=========================================="
             echo "GIT INFORMATION"
             echo "=========================================="
-            echo ""
-            echo "Commit SHA: << pipeline.parameters.deployment-meta-git-commit-sha >>"
-            echo "Commit Message: << pipeline.parameters.deployment-meta-git-commit-message >>"
-            echo "Commit Author: << pipeline.parameters.deployment-meta-git-commit-author >>"
-            echo "Commit Ref: << pipeline.parameters.deployment-meta-git-commit-ref >>"
+            
+            WEBHOOK_BODY='<< pipeline.trigger_parameters.webhook.body >>'
+            
+            COMMIT_SHA=$(echo "$WEBHOOK_BODY" | jq -r '.payload.deployment.meta.githubCommitSha // .payload.deployment.meta.gitlabCommitSha // .payload.deployment.meta.bitbucketCommitSha // "N/A"')
+            COMMIT_MESSAGE=$(echo "$WEBHOOK_BODY" | jq -r '.payload.deployment.meta.githubCommitMessage // .payload.deployment.meta.gitlabCommitMessage // .payload.deployment.meta.bitbucketCommitMessage // "N/A"')
+            COMMIT_AUTHOR=$(echo "$WEBHOOK_BODY" | jq -r '.payload.deployment.meta.githubCommitAuthorName // .payload.deployment.meta.gitlabCommitAuthorName // .payload.deployment.meta.bitbucketCommitAuthorName // "N/A"')
+            COMMIT_REF=$(echo "$WEBHOOK_BODY" | jq -r '.payload.deployment.meta.githubCommitRef // .payload.deployment.meta.gitlabCommitRef // .payload.deployment.meta.bitbucketCommitRef // "N/A"')
+            REPO_OWNER=$(echo "$WEBHOOK_BODY" | jq -r '.payload.deployment.meta.githubCommitOrg // .payload.deployment.meta.gitlabProjectNamespace // .payload.deployment.meta.bitbucketRepoOwner // "N/A"')
+            REPO_NAME=$(echo "$WEBHOOK_BODY" | jq -r '.payload.deployment.meta.githubCommitRepo // .payload.deployment.meta.gitlabProjectName // .payload.deployment.meta.bitbucketRepoSlug // "N/A"')
+            
+            echo "Commit SHA: $COMMIT_SHA"
+            echo "Commit Message: $COMMIT_MESSAGE"
+            echo "Commit Author: $COMMIT_AUTHOR"
+            echo "Commit Ref: $COMMIT_REF"
             echo ""
             echo "Repository:"
-            echo "  - ID: << pipeline.parameters.deployment-meta-git-repo-id >>"
-            echo "  - Owner: << pipeline.parameters.deployment-meta-git-repo-owner >>"
-            echo "  - Slug: << pipeline.parameters.deployment-meta-git-repo-slug >>"
+            echo "  - Owner: $REPO_OWNER"
+            echo "  - Name: $REPO_NAME"
             echo ""
             echo "=========================================="
       
       - run:
-          name: "Display User/Team Information"
+          name: "Extract User/Team Information"
           command: |
             echo "=========================================="
-            echo "USER/TEAM DETAILS"
+            echo "USER/TEAM INFORMATION"
             echo "=========================================="
+            
+            WEBHOOK_BODY='<< pipeline.trigger_parameters.webhook.body >>'
+            
+            USER_ID=$(echo "$WEBHOOK_BODY" | jq -r '.payload.user.id // "N/A"')
+            USERNAME=$(echo "$WEBHOOK_BODY" | jq -r '.payload.user.username // "N/A"')
+            TEAM_ID=$(echo "$WEBHOOK_BODY" | jq -r '.payload.team.id // "N/A"')
+            TEAM_SLUG=$(echo "$WEBHOOK_BODY" | jq -r '.payload.team.slug // "N/A"')
+            
+            echo "User ID: $USER_ID"
+            echo "Username: $USERNAME"
             echo ""
-            echo "User ID: << pipeline.parameters.user-id >>"
-            echo "Username: << pipeline.parameters.user-username >>"
-            echo ""
-            echo "Team ID: << pipeline.parameters.team-id >>"
-            echo "Team Slug: << pipeline.parameters.team-slug >>"
-            echo ""
-            echo "=========================================="
-      
-      - run:
-          name: "Display Links"
-          command: |
-            echo "=========================================="
-            echo "LINKS"
-            echo "=========================================="
-            echo ""
-            echo "Deployment Link: << pipeline.parameters.deployment-links-deployment >>"
-            echo "Project Link: << pipeline.parameters.deployment-links-project >>"
-            echo ""
-            echo "=========================================="
-      
-      - run:
-          name: "Display Full Payload (JSON)"
-          command: |
-            echo "=========================================="
-            echo "FULL WEBHOOK PAYLOAD"
-            echo "=========================================="
-            echo ""
-            echo '<< pipeline.parameters.full-payload >>' | jq '.' || echo '<< pipeline.parameters.full-payload >>'
+            echo "Team ID: $TEAM_ID"
+            echo "Team Slug: $TEAM_SLUG"
             echo ""
             echo "=========================================="
       
@@ -223,12 +155,13 @@ jobs:
             echo ""
             echo "Pipeline ID: << pipeline.id >>"
             echo "Pipeline Number: << pipeline.number >>"
-            echo "Triggered By: << pipeline.trigger_source >>"
+            echo "Trigger Source: << pipeline.trigger_source >>"
+            echo "Git Branch: << pipeline.git.branch >>"
             echo ""
             echo "=========================================="
 
 # Orchestrate jobs using workflows
 workflows:
-  vercel-webhook-handler:
+  vercel-deployment-webhook:
     jobs:
-      - display-vercel-deployment
+      - display-vercel-webhook
