@@ -3,48 +3,214 @@
 
 version: 2.1
 
-# Define pipeline parameters to receive webhook payload data
-# See: https://circleci.com/docs/reference/pipeline-variables/#pipeline-parameters
+# Define pipeline parameters to receive Vercel webhook payload data
+# Based on: https://vercel.com/docs/webhooks/webhooks-api#deployment.succeeded
 parameters:
-  webhook-payload:
+  # Top-level webhook fields
+  webhook-id:
     type: string
-    default: "{}"
+    default: ""
   event-type:
     type: string
-    default: "unknown"
-  sender:
+    default: "deployment.succeeded"
+  created-at:
+    type: integer
+    default: 0
+  region:
     type: string
-    default: "unknown"
+    default: ""
+  
+  # Deployment payload fields
+  deployment-id:
+    type: string
+    default: ""
+  deployment-url:
+    type: string
+    default: ""
+  deployment-name:
+    type: string
+    default: ""
+  deployment-state:
+    type: string
+    default: ""
+  deployment-target:
+    type: string
+    default: ""
+  deployment-type:
+    type: string
+    default: ""
+  deployment-created-at:
+    type: integer
+    default: 0
+  deployment-ready:
+    type: integer
+    default: 0
+  
+  # Project information
+  project-id:
+    type: string
+    default: ""
+  project-name:
+    type: string
+    default: ""
+  
+  # User/Team information
+  user-id:
+    type: string
+    default: ""
+  user-username:
+    type: string
+    default: ""
+  team-id:
+    type: string
+    default: ""
+  team-slug:
+    type: string
+    default: ""
+  
+  # Links and metadata
+  deployment-links-deployment:
+    type: string
+    default: ""
+  deployment-links-project:
+    type: string
+    default: ""
+  
+  # Git information
+  deployment-meta-git-commit-sha:
+    type: string
+    default: ""
+  deployment-meta-git-commit-message:
+    type: string
+    default: ""
+  deployment-meta-git-commit-author:
+    type: string
+    default: ""
+  deployment-meta-git-commit-ref:
+    type: string
+    default: ""
+  deployment-meta-git-repo-id:
+    type: string
+    default: ""
+  deployment-meta-git-repo-owner:
+    type: string
+    default: ""
+  deployment-meta-git-repo-slug:
+    type: string
+    default: ""
+  
+  # Full payload as JSON string (for complete data)
+  full-payload:
+    type: string
+    default: "{}"
 
-# Define a job to be invoked later in a workflow.
-# See: https://circleci.com/docs/guides/orchestrate/jobs-steps/#jobs-overview & https://circleci.com/docs/reference/configuration-reference/#jobs
+# Define a job to display the Vercel webhook payload
 jobs:
-  display-webhook-payload:
-    # Specify the execution environment. You can specify an image from Docker Hub or use one of our convenience images from CircleCI's Developer Hub.
-    # See: https://circleci.com/docs/guides/execution-managed/executor-intro/ & https://circleci.com/docs/reference/configuration-reference/#executor-job
+  display-vercel-deployment:
     docker:
-      # Specify the version you desire here
-      # See: https://circleci.com/developer/images/image/cimg/base
       - image: cimg/base:current
 
-    # Add steps to the job
-    # See: https://circleci.com/docs/guides/orchestrate/jobs-steps/#steps-overview & https://circleci.com/docs/reference/configuration-reference/#steps
     steps:
-      # Checkout the code as the first step.
       - checkout
       
       - run:
-          name: "Display Webhook Payload"
+          name: "Display Vercel Webhook Event Information"
           command: |
             echo "=========================================="
-            echo "WEBHOOK PAYLOAD INFORMATION"
+            echo "VERCEL WEBHOOK EVENT"
             echo "=========================================="
             echo ""
+            echo "Event ID: << pipeline.parameters.webhook-id >>"
             echo "Event Type: << pipeline.parameters.event-type >>"
-            echo "Sender: << pipeline.parameters.sender >>"
+            echo "Created At: << pipeline.parameters.created-at >>"
+            echo "Region: << pipeline.parameters.region >>"
             echo ""
-            echo "Full Payload:"
-            echo "<< pipeline.parameters.webhook-payload >>"
+            echo "=========================================="
+      
+      - run:
+          name: "Display Deployment Information"
+          command: |
+            echo "=========================================="
+            echo "DEPLOYMENT DETAILS"
+            echo "=========================================="
+            echo ""
+            echo "Deployment ID: << pipeline.parameters.deployment-id >>"
+            echo "Deployment URL: << pipeline.parameters.deployment-url >>"
+            echo "Deployment Name: << pipeline.parameters.deployment-name >>"
+            echo "State: << pipeline.parameters.deployment-state >>"
+            echo "Target: << pipeline.parameters.deployment-target >>"
+            echo "Type: << pipeline.parameters.deployment-type >>"
+            echo "Created At: << pipeline.parameters.deployment-created-at >>"
+            echo "Ready At: << pipeline.parameters.deployment-ready >>"
+            echo ""
+            echo "=========================================="
+      
+      - run:
+          name: "Display Project Information"
+          command: |
+            echo "=========================================="
+            echo "PROJECT DETAILS"
+            echo "=========================================="
+            echo ""
+            echo "Project ID: << pipeline.parameters.project-id >>"
+            echo "Project Name: << pipeline.parameters.project-name >>"
+            echo ""
+            echo "=========================================="
+      
+      - run:
+          name: "Display Git Information"
+          command: |
+            echo "=========================================="
+            echo "GIT INFORMATION"
+            echo "=========================================="
+            echo ""
+            echo "Commit SHA: << pipeline.parameters.deployment-meta-git-commit-sha >>"
+            echo "Commit Message: << pipeline.parameters.deployment-meta-git-commit-message >>"
+            echo "Commit Author: << pipeline.parameters.deployment-meta-git-commit-author >>"
+            echo "Commit Ref: << pipeline.parameters.deployment-meta-git-commit-ref >>"
+            echo ""
+            echo "Repository:"
+            echo "  - ID: << pipeline.parameters.deployment-meta-git-repo-id >>"
+            echo "  - Owner: << pipeline.parameters.deployment-meta-git-repo-owner >>"
+            echo "  - Slug: << pipeline.parameters.deployment-meta-git-repo-slug >>"
+            echo ""
+            echo "=========================================="
+      
+      - run:
+          name: "Display User/Team Information"
+          command: |
+            echo "=========================================="
+            echo "USER/TEAM DETAILS"
+            echo "=========================================="
+            echo ""
+            echo "User ID: << pipeline.parameters.user-id >>"
+            echo "Username: << pipeline.parameters.user-username >>"
+            echo ""
+            echo "Team ID: << pipeline.parameters.team-id >>"
+            echo "Team Slug: << pipeline.parameters.team-slug >>"
+            echo ""
+            echo "=========================================="
+      
+      - run:
+          name: "Display Links"
+          command: |
+            echo "=========================================="
+            echo "LINKS"
+            echo "=========================================="
+            echo ""
+            echo "Deployment Link: << pipeline.parameters.deployment-links-deployment >>"
+            echo "Project Link: << pipeline.parameters.deployment-links-project >>"
+            echo ""
+            echo "=========================================="
+      
+      - run:
+          name: "Display Full Payload (JSON)"
+          command: |
+            echo "=========================================="
+            echo "FULL WEBHOOK PAYLOAD"
+            echo "=========================================="
+            echo ""
+            echo '<< pipeline.parameters.full-payload >>' | jq '.' || echo '<< pipeline.parameters.full-payload >>'
             echo ""
             echo "=========================================="
       
@@ -52,29 +218,17 @@ jobs:
           name: "Display Pipeline Metadata"
           command: |
             echo "=========================================="
-            echo "PIPELINE METADATA"
+            echo "CIRCLECI PIPELINE METADATA"
             echo "=========================================="
+            echo ""
             echo "Pipeline ID: << pipeline.id >>"
             echo "Pipeline Number: << pipeline.number >>"
             echo "Triggered By: << pipeline.trigger_source >>"
-            echo "Git Branch: << pipeline.git.branch >>"
-            echo "Git Revision: << pipeline.git.revision >>"
-            echo "Git Tag: << pipeline.git.tag >>"
-            echo "=========================================="
-      
-      - run:
-          name: "Display Environment Variables"
-          command: |
-            echo "=========================================="
-            echo "ENVIRONMENT VARIABLES"
-            echo "=========================================="
-            printenv | grep -E "(CIRCLE|CI)" | sort
+            echo ""
             echo "=========================================="
 
 # Orchestrate jobs using workflows
-# See: https://circleci.com/docs/guides/orchestrate/workflows/ & https://circleci.com/docs/reference/configuration-reference/#workflows
 workflows:
-  webhook-handler-workflow:
-    # Inside the workflow, you define the jobs you want to run.
+  vercel-webhook-handler:
     jobs:
-      - display-webhook-payload
+      - display-vercel-deployment
